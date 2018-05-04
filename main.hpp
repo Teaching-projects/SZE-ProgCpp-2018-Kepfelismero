@@ -17,6 +17,33 @@ enum Tipus {
 	MOBIL = 0
 };
 
+class TreningElem {
+private:
+	cv::Mat kep;
+	std::string fajlnev;
+	bool pozvagyneg;
+public:
+	TreningElem(cv::Mat _kep, std::string _fajlnev, bool _pozvagyneg) :kep(_kep), fajlnev(_fajlnev), pozvagyneg(_pozvagyneg) {  }; //konstruktor
+	std::string getFajnev();
+	cv::Mat getKep();
+	bool getAdatFajta();
+};
+
+class TreningElemTarolo {
+private:
+	std::vector<TreningElem> mobil;
+
+public:
+	void addToTarolo(TreningElem t, enum Tipus tt);
+	std::vector<TreningElem> getTarolo(enum Tipus t) {
+		if (t == Tipus::MOBIL) {
+			return this->mobil;
+		}
+		else return this->mobil;
+	}
+	void beolvas(std::vector<std::string> fajlnevek, enum Tipus t);
+};
+
 static class Muveletek {
 public:
 	static cv::Mat kepBeolvas(std::string Fajlnev, int mod);
