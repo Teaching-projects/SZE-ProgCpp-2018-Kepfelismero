@@ -14,7 +14,8 @@
 #define BLACKandWHITE cv::ImreadModes::IMREAD_GRAYSCALE
 
 enum Tipus {
-	MOBIL = 0
+	MOBIL = 0,
+	NINCS_TALALAT
 };
 
 class TreningElem {
@@ -34,6 +35,7 @@ private:
 	std::vector<TreningElem> mobil;
 
 public:
+	static void listazas(std::vector<TreningElem> tarolo);
 	void addToTarolo(TreningElem t, enum Tipus tt);
 	std::vector<TreningElem> getTarolo(enum Tipus t) {
 		if (t == Tipus::MOBIL) {
@@ -42,6 +44,8 @@ public:
 		else return this->mobil;
 	}
 	void beolvas(std::vector<std::string> fajlnevek, enum Tipus t);
+	int getPozDB(std::vector<TreningElem> tarolo);
+	enum Tipus svmTrening(enum Tipus t, std::string fajlnev);
 };
 
 static class Muveletek {

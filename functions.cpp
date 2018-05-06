@@ -10,10 +10,16 @@ cv::Mat Muveletek::kepBeolvas(std::string Fajlnev, int mod) {
 }
 
 bool TreningElem::getAdatFajta() { return this->pozvagyneg; }
-
 std::string TreningElem::getFajnev() { return this->fajlnev; }
-
 cv::Mat TreningElem::getKep() { return this->kep; }
+
+void TreningElemTarolo::listazas(std::vector<TreningElem> tarolo) {
+	std::cout << "A felvett trening mintak:" << std::endl;
+	int i = 0;
+	for (std::vector<TreningElem>::iterator it = tarolo.begin(); it != tarolo.end(); ++it, ++i) {
+		std::cout << i << ". elem: " << it->getFajnev() << "\t\tPozitiv? " << it->getAdatFajta() << std::endl;
+	}
+}
 
 void TreningElemTarolo::beolvas(std::vector<std::string> fajlnevek, enum Tipus t) {
 	for (int i = 0; i < fajlnevek.size(); i++) {
@@ -29,3 +35,12 @@ void TreningElemTarolo::addToTarolo(TreningElem t, enum Tipus tt) {
 		this->mobil.push_back(t);
 	}
 }
+
+int TreningElemTarolo::getPozDB(std::vector<TreningElem> tarolo) {
+	int i = 0;
+	for (std::vector<TreningElem>::iterator it = tarolo.begin(); it != tarolo.end(); ++it) {
+		if (it->getAdatFajta()) i++;
+	}
+	return i;
+}
+
