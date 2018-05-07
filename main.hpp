@@ -15,6 +15,7 @@
 
 enum Tipus {
 	MOBIL = 0,
+	SOR = 1,
 	NINCS_TALALAT
 };
 
@@ -33,13 +34,16 @@ public:
 class TreningElemTarolo {
 private:
 	std::vector<TreningElem> mobil;
-
+	std::vector<TreningElem> sor;
 public:
 	static void listazas(std::vector<TreningElem> tarolo);
 	void addToTarolo(TreningElem t, enum Tipus tt);
 	std::vector<TreningElem> getTarolo(enum Tipus t) {
 		if (t == Tipus::MOBIL) {
 			return this->mobil;
+		}
+		else if (t == Tipus::SOR) {
+			return this->sor;
 		}
 		else return this->mobil;
 	}
