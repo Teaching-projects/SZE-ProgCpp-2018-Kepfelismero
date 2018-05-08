@@ -133,10 +133,15 @@ int main() {
 	cv::imshow("SOR Negativ mintak beolvasva", sor_negativak);
 	//////////////
 
-
-	Tipus eredmeny = tarolo.svmTrening(Tipus::MOBIL, bekeres);
+	Tipus eredmeny = tarolo.svmTrening(Tipus::SOR, bekeres);
 	if (eredmeny == Tipus::NINCS_TALALAT) {
 		std::cout << "Az objektum (" << bekeres << ") nem meghatorzhato!" << std::endl;
+	}
+	else if (eredmeny == Tipus::MOBIL) {
+		std::cout << "Az objektum egy mobiltelefon!" << std::endl;
+	}
+	else if (eredmeny == Tipus::SOR) {
+		std::cout << "Az objektum egy sorosuveg!" << std::endl;
 	}
 
 	cv::waitKey();
