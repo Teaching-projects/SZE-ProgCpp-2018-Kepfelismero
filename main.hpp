@@ -10,7 +10,7 @@
 #include <opencv2\ml.hpp>
 #include <string>
 
-#define TIPUSDB 1
+#define TIPUSDB 2
 #define BLACKandWHITE cv::ImreadModes::IMREAD_GRAYSCALE
 
 enum Tipus {

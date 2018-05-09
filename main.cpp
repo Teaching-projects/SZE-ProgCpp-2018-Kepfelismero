@@ -10,6 +10,7 @@ int main() {
 		std::cin >> bekeres;
 		cv::Mat teszt = cv::imread(bekeres, BLACKandWHITE);
 		if (!teszt.empty()) ok = true;
+		else if (!bekeres.compare("exit")) return 0;
 		else std::cout << "Nem letezo fajl!" << std::endl;
 	} while (!ok);
 
@@ -132,18 +133,22 @@ int main() {
 
 	cv::imshow("SOR Negativ mintak beolvasva", sor_negativak);
 	//////////////
-
-	Tipus eredmeny = tarolo.svmTrening(Tipus::SOR, bekeres);
-	if (eredmeny == Tipus::NINCS_TALALAT) {
-		std::cout << "Az objektum (" << bekeres << ") nem meghatorzhato!" << std::endl;
+	bool vege = false;
+	int tipdbcheck = 0;
+	enum Tipus tipustumb[TIPUSDB] = { Tipus::MOBIL, Tipus::SOR };
+	while (tipdbcheck < TIPUSDB && !vege) {
+		Tipus eredmeny = tarolo.svmTrening(tipustumb[tipdbcheck], bekeres);
+		if (eredmeny == Tipus::MOBIL) {
+			std::cout << "Az objektum egy mobiltelefon!" << std::endl;
+			vege = true;
+		}
+		else if (eredmeny == Tipus::SOR) {
+			std::cout << "Az objektum egy sorosuveg!" << std::endl;
+			vege = true;
+		}
+		tipdbcheck++;
 	}
-	else if (eredmeny == Tipus::MOBIL) {
-		std::cout << "Az objektum egy mobiltelefon!" << std::endl;
-	}
-	else if (eredmeny == Tipus::SOR) {
-		std::cout << "Az objektum egy sorosuveg!" << std::endl;
-	}
-
+	if (!vege) std::cout << "Az objektum (" << bekeres << ") nem meghatorzhato!" << std::endl;
 	cv::waitKey();
 	return 0;
 }
