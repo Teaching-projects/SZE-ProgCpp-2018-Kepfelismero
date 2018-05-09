@@ -135,7 +135,7 @@ int main() {
 	//////////////
 	bool vege = false;
 	int tipdbcheck = 0;
-	enum Tipus tipustumb[TIPUSDB] = { Tipus::MOBIL, Tipus::SOR };
+	enum Tipus tipustumb[TIPUSDB] = { Tipus::MOBIL, Tipus::SOR, Tipus::BURGER };
 	while (tipdbcheck < TIPUSDB && !vege) {
 		Tipus eredmeny = tarolo.svmTrening(tipustumb[tipdbcheck], bekeres);
 		if (eredmeny == Tipus::MOBIL) {
@@ -146,9 +146,12 @@ int main() {
 			std::cout << "Az objektum egy sorosuveg!" << std::endl;
 			vege = true;
 		}
+		else if (eredmeny == Tipus::BURGER) {
+			std::cout << "Az objektum egy hamburger!" << std::endl;
+			vege = true;
+		}
 		tipdbcheck++;
 	}
 	if (!vege) std::cout << "Az objektum (" << bekeres << ") nem meghatorzhato!" << std::endl;
 	cv::waitKey();
-	return 0;
 }

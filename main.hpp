@@ -10,12 +10,13 @@
 #include <opencv2\ml.hpp>
 #include <string>
 
-#define TIPUSDB 2
+#define TIPUSDB 3
 #define BLACKandWHITE cv::ImreadModes::IMREAD_GRAYSCALE
 
 enum Tipus {
-	MOBIL = 0,
-	SOR = 1,
+	MOBIL,
+	SOR,
+	BURGER,
 	NINCS_TALALAT
 };
 
