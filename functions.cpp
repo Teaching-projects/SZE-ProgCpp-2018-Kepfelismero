@@ -10,7 +10,9 @@ cv::Mat Muveletek::kepBeolvas(std::string Fajlnev, int mod) {
 }
 
 bool TreningElem::getAdatFajta() { return this->pozvagyneg; }
+
 std::string TreningElem::getFajnev() { return this->fajlnev; }
+
 cv::Mat TreningElem::getKep() { return this->kep; }
 
 void TreningElemTarolo::listazas(std::vector<TreningElem> tarolo) {
@@ -21,19 +23,22 @@ void TreningElemTarolo::listazas(std::vector<TreningElem> tarolo) {
 	}
 }
 
-void TreningElemTarolo::beolvas(std::vector<std::string> fajlnevek, enum Tipus t) {
-	for (int i = 0; i < fajlnevek.size(); i++) {
-		cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnevek[i], BLACKandWHITE);
-		TreningElem t1{ beolvasottkep, fajlnevek[i], true };
-		if (t == Tipus::MOBIL) {
-			this->mobil.push_back(t1);
-		}
-		else if (t == Tipus::SOR) {
-			this->sor.push_back(t1);
-		}
-	}
-
+/*void TreningElemTarolo::beolvas(std::vector<std::string> fajlnevek, enum Tipus t) {
+for (int i = 0; i < fajlnevek.size(); i++) {
+cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnevek[i], BLACKandWHITE);
+TreningElem t1{ beolvasottkep, fajlnevek[i], true };
+if (t == Tipus::MOBIL) {
+this->mobil.push_back(t1);
 }
+else if (t == Tipus::SOR) {
+this->sor.push_back(t1);
+}
+else if (t == Tipus::BURGER) {
+this->burger.push_back(t1);
+}
+}
+
+}*/
 
 void TreningElemTarolo::addToTarolo(TreningElem t, enum Tipus tt) {
 	if (tt == Tipus::MOBIL) {
@@ -41,6 +46,9 @@ void TreningElemTarolo::addToTarolo(TreningElem t, enum Tipus tt) {
 	}
 	else if (tt == Tipus::SOR) {
 		this->sor.push_back(t);
+	}
+	else if (tt == Tipus::BURGER) {
+		this->burger.push_back(t);
 	}
 }
 
@@ -50,6 +58,72 @@ int TreningElemTarolo::getPozDB(std::vector<TreningElem> tarolo) {
 		if (it->getAdatFajta()) i++;
 	}
 	return i;
+}
+
+std::vector<TreningElem> TreningElemTarolo::getTarolo(enum Tipus t) {
+	if (t == Tipus::MOBIL) {
+		return this->mobil;
+	}
+	else if (t == Tipus::SOR) {
+		return this->sor;
+	}
+	else if (t == Tipus::BURGER) {
+		return this->burger;
+	}
+	else return this->mobil;
+}
+
+void TreningElemTarolo::beolvas(std::string utvonal, std::string kiterjesztes, Tipus hova) {
+	//pozitív minták
+	for (int i = 0; i < 8; i++) {
+		std::string fajlnev = utvonal;
+		std::ostringstream ss;
+		ss << std::setfill('0') << std::setw(2) << i;
+		fajlnev += ss.str();
+		fajlnev += kiterjesztes;
+		cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnev, BLACKandWHITE);
+		TreningElem t{ beolvasottkep, fajlnev, true };
+		this->addToTarolo(t, hova);
+	}
+
+	cv::Mat pozitivak(2 * this->getTarolo(hova)[0].getKep().rows, 4 * this->getTarolo(hova)[0].getKep().cols, CV_8U);
+	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 4; j++) {
+			this->getTarolo(hova)[i * 4 + j].getKep().copyTo(pozitivak(
+				cv::Rect(j*this->getTarolo(hova)[i * 4 + j].getKep().cols,
+					i*this->getTarolo(hova)[i * 4 + j].getKep().rows,
+					this->getTarolo(hova)[i * 4 + j].getKep().cols,
+					this->getTarolo(hova)[i * 4 + j].getKep().rows)));
+		}
+
+	cv::imshow("MOBIL Pozitiv mintak beolvasva", pozitivak);
+
+
+	//negatív minták beolvasása
+	std::string nprefix = "mobil/neg";
+	for (int i = 0; i < 8; i++) {
+		std::string fajlnev(nprefix);
+		std::ostringstream ss; ss << std::setfill('0') << std::setw(2) << i;
+		fajlnev += ss.str();
+		fajlnev += ".png";
+		cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnev, BLACKandWHITE);
+		TreningElem t{ beolvasottkep, fajlnev, false };
+		this->addToTarolo(t, hova);
+	}
+	int pozdb = this->getPozDB(this->getTarolo(hova)); //pozitív minták számának lekérése
+	std::cout << pozdb << " darab pozitiv minta volt!" << std::endl;
+	
+	//negativ minták
+	cv::Mat negativak(2 * this->getTarolo(hova)[7].getKep().rows, 4 * this->getTarolo(hova)[7].getKep().cols, CV_8U);
+	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 4; j++) {
+			this->getTarolo(hova)[i * 4 + j + pozdb].getKep().copyTo(negativak(cv::Rect(j*this->getTarolo(hova)[i * 4 + j + 7].getKep().cols,
+				i*this->getTarolo(hova)[i * 4 + j + pozdb].getKep().rows,
+				this->getTarolo(hova)[i * 4 + j + pozdb].getKep().cols,
+				this->getTarolo(hova)[i * 4 + j + pozdb].getKep().rows)));
+		}
+	//this->listazas(this->getTarolo(hova));
+	cv::imshow("MOBIL Negativ mintak beolvasva", negativak);
 }
 
 enum Tipus TreningElemTarolo::svmTrening(enum Tipus t, std::string fajlnev) {

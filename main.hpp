@@ -11,6 +11,7 @@
 #include <string>
 
 #define TIPUSDB 3
+#define KEPDB 8 //beolvasott képek darabszáma típusonként
 #define BLACKandWHITE cv::ImreadModes::IMREAD_GRAYSCALE
 
 enum Tipus {
@@ -36,19 +37,12 @@ class TreningElemTarolo {
 private:
 	std::vector<TreningElem> mobil;
 	std::vector<TreningElem> sor;
+	std::vector<TreningElem> burger;
 public:
 	static void listazas(std::vector<TreningElem> tarolo);
 	void addToTarolo(TreningElem t, enum Tipus tt);
-	std::vector<TreningElem> getTarolo(enum Tipus t) {
-		if (t == Tipus::MOBIL) {
-			return this->mobil;
-		}
-		else if (t == Tipus::SOR) {
-			return this->sor;
-		}
-		else return this->mobil;
-	}
-	void beolvas(std::vector<std::string> fajlnevek, enum Tipus t);
+	std::vector<TreningElem> getTarolo(enum Tipus t);
+	void beolvas(std::string utvonal, std::string kiterjesztes, Tipus hova);
 	int getPozDB(std::vector<TreningElem> tarolo);
 	enum Tipus svmTrening(enum Tipus t, std::string fajlnev);
 };
