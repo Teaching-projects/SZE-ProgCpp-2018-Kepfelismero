@@ -74,6 +74,13 @@ std::vector<TreningElem> TreningElemTarolo::getTarolo(enum Tipus t) {
 }
 
 void TreningElemTarolo::beolvas(std::string utvonal, std::string kiterjesztes, Tipus hova) {
+	std::string ablaknev;
+	if (hova == Tipus::MOBIL) ablaknev += "MOBIL";
+	else if (hova == Tipus::SOR) ablaknev += "SOR";
+	else if (hova == Tipus::BURGER) ablaknev += "HAMBURGER";
+	std::string pozminstring = " pozitiv mintak beolvasva";
+	std::string negmintstring = " negativ mintak beolvasva";
+
 	//pozitív minták
 	for (int i = 0; i < 8; i++) {
 		std::string fajlnev = utvonal;
