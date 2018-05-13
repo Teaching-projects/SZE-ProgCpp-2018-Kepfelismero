@@ -25,7 +25,7 @@ void TreningElemTarolo::listazas(std::vector<TreningElem> tarolo) {
 
 /*void TreningElemTarolo::beolvas(std::vector<std::string> fajlnevek, enum Tipus t) {
 for (int i = 0; i < fajlnevek.size(); i++) {
-cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnevek[i], BLACKandWHITE);
+cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnevek[i], GRAYSCALE);
 TreningElem t1{ beolvasottkep, fajlnevek[i], true };
 if (t == Tipus::MOBIL) {
 this->mobil.push_back(t1);
@@ -88,7 +88,7 @@ void TreningElemTarolo::beolvas(std::string utvonal, std::string kiterjesztes, T
 		ss << std::setfill('0') << std::setw(2) << i;
 		fajlnev += ss.str();
 		fajlnev += kiterjesztes;
-		cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnev, BLACKandWHITE);
+		cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnev, GRAYSCALE);
 		TreningElem t{ beolvasottkep, fajlnev, true };
 		this->addToTarolo(t, hova);
 	}
@@ -113,7 +113,7 @@ void TreningElemTarolo::beolvas(std::string utvonal, std::string kiterjesztes, T
 		std::ostringstream ss; ss << std::setfill('0') << std::setw(2) << i;
 		fajlnev += ss.str();
 		fajlnev += ".png";
-		cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnev, BLACKandWHITE);
+		cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnev, GRAYSCALE);
 		TreningElem t{ beolvasottkep, fajlnev, false };
 		this->addToTarolo(t, hova);
 	}
@@ -146,7 +146,7 @@ enum Tipus TreningElemTarolo::svmTrening(enum Tipus t, std::string fajlnev) {
 	HOGLeiro.compute(this->getTarolo(t)[0].getKep(), leirotarolo);
 
 	std::cout << "A leirok szama: " << leirotarolo.size() << std::endl;
-	cv::Mat bekert = cv::imread(fajlnev, BLACKandWHITE);
+	cv::Mat bekert = cv::imread(fajlnev, GRAYSCALE);
 	std::cout << "A felhasznalotol bekert kep merete: " << bekert.size << " pixel" << std::endl;
 	std::cout << "A vizsgalt elso kep merete: " << this->getTarolo(t)[0].getKep().size << " pixel" << std::endl;
 
@@ -199,7 +199,7 @@ enum Tipus TreningElemTarolo::svmTrening(enum Tipus t, std::string fajlnev) {
 	std::vector<float> keresesvector;
 
 	//keresés:
-	HOGLeiro.compute(Muveletek::kepBeolvas(fajlnev, BLACKandWHITE), leirotarolo);
+	HOGLeiro.compute(Muveletek::kepBeolvas(fajlnev, GRAYSCALE), leirotarolo);
 	for (int i = 0; i < jelldb; i++) {
 		keresesvector.push_back(leirotarolo[i]);
 	}

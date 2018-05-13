@@ -12,7 +12,7 @@
 
 #define TIPUSDB 3
 #define KEPDB 8 //beolvasott képek darabszáma típusonként
-#define BLACKandWHITE cv::ImreadModes::IMREAD_GRAYSCALE
+#define GRAYSCALE cv::ImreadModes::IMREAD_GRAYSCALE
 
 enum Tipus {
 	MOBIL,
