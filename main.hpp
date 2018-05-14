@@ -13,43 +13,49 @@
 #define TIPUSDB 3
 #define KEPDB 8 //beolvasott képek darabszáma típusonként
 #define GRAYSCALE cv::ImreadModes::IMREAD_GRAYSCALE
+#define PI 3.1415927
 
 enum Tipus {
 	MOBIL,
-	SOR,
 	BURGER,
+	STOP,
 	NINCS_TALALAT
 };
+
+typedef enum Tipus Kategoria;
 
 class TreningElem {
 private:
 	cv::Mat kep;
 	std::string fajlnev;
-	bool pozvagyneg;
+	bool isPozitiv;
 public:
-	TreningElem(cv::Mat _kep, std::string _fajlnev, bool _pozvagyneg) :kep(_kep), fajlnev(_fajlnev), pozvagyneg(_pozvagyneg) {  }; //konstruktor
-	std::string getFajnev();
-	cv::Mat getKep();
-	bool getAdatFajta();
+	TreningElem(cv::Mat _kep, std::string _fajlnev, bool _pozvagyneg) :kep(_kep), fajlnev(_fajlnev), isPozitiv(_pozvagyneg) {  }; //konstruktor
+	std::string getFajnev() const;
+	cv::Mat getKep() const;
+	bool getAdatFajta() const;
 };
 
 class TreningElemTarolo {
 private:
 	std::vector<TreningElem> mobil;
-	std::vector<TreningElem> sor;
 	std::vector<TreningElem> burger;
-public:
-	static void listazas(std::vector<TreningElem> tarolo);
-	void addToTarolo(TreningElem t, enum Tipus tt);
-	std::vector<TreningElem> getTarolo(enum Tipus t);
-	void beolvas(std::string utvonal, std::string kiterjesztes, Tipus hova);
+	std::vector<TreningElem> stop;
 	int getPozDB(std::vector<TreningElem> tarolo);
-	enum Tipus svmTrening(enum Tipus t, std::string fajlnev);
+	
+public:
+	void beolvas(std::string utvonal, std::string kiterjesztes, Tipus hova);
+	std::vector<TreningElem> getTarolo(Kategoria t);
+	static void listazas(std::vector<TreningElem> tarolo);
+	void addToTarolo(TreningElem t, Kategoria tt);
+	Kategoria svmTrening(Kategoria t, std::string fajlnev);
 };
 
 static class Muveletek {
 public:
 	static cv::Mat kepBeolvas(std::string Fajlnev, int mod);
+	static void Muveletek::hogRajzol(std::vector<float>::const_iterator hog, int bindb, cv::Mat kep, float meretezes);
+	static void Muveletek::kepreRajzol(cv::Mat kep, cv::Mat hogKep, cv::Size cellameret, int bindb);
 };
 
 #endif // !MAIN_HPP

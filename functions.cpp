@@ -9,46 +9,83 @@ cv::Mat Muveletek::kepBeolvas(std::string Fajlnev, int mod) {
 	return beolvasottkep;
 }
 
-bool TreningElem::getAdatFajta() { return this->pozvagyneg; }
+void Muveletek::hogRajzol(std::vector<float>::const_iterator hog, int bindb, cv::Mat kep, float meretezes) {
+	float lepes = PI / bindb;
+	float cx = kep.cols / 2.0;
+	float cy = kep.rows / 2.0;
 
-std::string TreningElem::getFajnev() { return this->fajlnev; }
+	for (int i = 0; i < bindb; i++) {
+		float szog = i*lepes;
+		float Xirany = cos(szog);
+		float Yirany = sin(szog);
+		float hossz = 0.7*kep.rows*hog[i];
 
-cv::Mat TreningElem::getKep() { return this->kep; }
+		float x1 = cx - Xirany * hossz * meretezes;
+		float y1 = cy - Yirany * hossz * meretezes;
+		float x2 = cx + Xirany * hossz * meretezes;
+		float y2 = cy + Yirany * hossz * meretezes;
+		cv::line(kep, cv::Point(x1, y1), cv::Point(x2, y2), CV_RGB(255, 255, 255), 1);
+	}
+}
+
+void Muveletek::kepreRajzol(cv::Mat kep, cv::Mat hogKep, cv::Size cellameret, int bindb) {
+
+	cv::HOGDescriptor hog(cv::Size((kep.cols / cellameret.width) * cellameret.width,
+		(kep.rows / cellameret.height) * cellameret.height),
+		cv::Size((kep.cols / cellameret.width) * cellameret.width,
+		(kep.rows / cellameret.height) * cellameret.height),
+		cellameret,
+		cellameret, 
+		bindb);
+
+	std::vector<float> leirotarolo;
+	hog.compute(kep, leirotarolo);
+
+	float meretezes = 1.0 / *std::max_element(leirotarolo.begin(), leirotarolo.end());
+
+	hogKep.create(kep.rows, kep.cols, CV_8U);
+
+	std::vector<float>::const_iterator it = leirotarolo.begin();
+
+	int sor_futas = kep.rows / cellameret.height;
+	int oszlop_futas = kep.cols / cellameret.width;
+
+	for (int i = 0; i < sor_futas; i++) {
+		for (int j = 0; j < oszlop_futas; j++) {
+			hogKep(cv::Rect(j*cellameret.width, i*cellameret.height, cellameret.width, cellameret.height));
+			hogRajzol(it, bindb, hogKep(cv::Rect(j*cellameret.width, i*cellameret.height,
+				cellameret.width, cellameret.height)), meretezes);
+			it += bindb;
+		}
+	}
+}
+
+bool TreningElem::getAdatFajta() const { return this->isPozitiv; }
+
+std::string TreningElem::getFajnev() const { return this->fajlnev; }
+
+cv::Mat TreningElem::getKep() const { return this->kep; }
 
 void TreningElemTarolo::listazas(std::vector<TreningElem> tarolo) {
 	std::cout << "A felvett trening mintak:" << std::endl;
 	int i = 0;
 	for (std::vector<TreningElem>::iterator it = tarolo.begin(); it != tarolo.end(); ++it, ++i) {
-		std::cout << i << ". elem: " << it->getFajnev() << "\t\tPozitiv? " << it->getAdatFajta() << std::endl;
+		std::string pozvagyneg;
+		if (it->getAdatFajta()) pozvagyneg.append("igen");
+		else pozvagyneg.append("nem");
+		std::cout << i << ". elem: " << it->getFajnev() << "\t\tPozitiv? " << pozvagyneg << std::endl;
 	}
 }
 
-/*void TreningElemTarolo::beolvas(std::vector<std::string> fajlnevek, enum Tipus t) {
-for (int i = 0; i < fajlnevek.size(); i++) {
-cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnevek[i], GRAYSCALE);
-TreningElem t1{ beolvasottkep, fajlnevek[i], true };
-if (t == Tipus::MOBIL) {
-this->mobil.push_back(t1);
-}
-else if (t == Tipus::SOR) {
-this->sor.push_back(t1);
-}
-else if (t == Tipus::BURGER) {
-this->burger.push_back(t1);
-}
-}
-
-}*/
-
-void TreningElemTarolo::addToTarolo(TreningElem t, enum Tipus tt) {
+void TreningElemTarolo::addToTarolo(TreningElem t, Kategoria tt) {
 	if (tt == Tipus::MOBIL) {
 		this->mobil.push_back(t);
 	}
-	else if (tt == Tipus::SOR) {
-		this->sor.push_back(t);
-	}
 	else if (tt == Tipus::BURGER) {
 		this->burger.push_back(t);
+	}
+	else if (tt == Tipus::STOP) {
+		this->stop.push_back(t);
 	}
 }
 
@@ -60,15 +97,15 @@ int TreningElemTarolo::getPozDB(std::vector<TreningElem> tarolo) {
 	return i;
 }
 
-std::vector<TreningElem> TreningElemTarolo::getTarolo(enum Tipus t) {
+std::vector<TreningElem> TreningElemTarolo::getTarolo(Kategoria t) {
 	if (t == Tipus::MOBIL) {
 		return this->mobil;
 	}
-	else if (t == Tipus::SOR) {
-		return this->sor;
-	}
 	else if (t == Tipus::BURGER) {
 		return this->burger;
+	}
+	else if (t == Tipus::STOP) {
+		return this->stop;
 	}
 	else return this->mobil;
 }
@@ -76,13 +113,13 @@ std::vector<TreningElem> TreningElemTarolo::getTarolo(enum Tipus t) {
 void TreningElemTarolo::beolvas(std::string utvonal, std::string kiterjesztes, Tipus hova) {
 	std::string ablaknev;
 	if (hova == Tipus::MOBIL) ablaknev += "MOBIL";
-	else if (hova == Tipus::SOR) ablaknev += "SOR";
-	else if (hova == Tipus::BURGER) ablaknev += "HAMBURGER";
+	else if (hova == Tipus::BURGER) ablaknev += "BURGER";
+	else if (hova == Tipus::STOP) ablaknev += "STOP";
 	std::string pozminstring = " pozitiv mintak beolvasva";
 	std::string negmintstring = " negativ mintak beolvasva";
 
 	//pozitív minták
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < KEPDB; i++) {
 		std::string fajlnev = utvonal;
 		std::ostringstream ss;
 		ss << std::setfill('0') << std::setw(2) << i;
@@ -92,7 +129,7 @@ void TreningElemTarolo::beolvas(std::string utvonal, std::string kiterjesztes, T
 		TreningElem t{ beolvasottkep, fajlnev, true };
 		this->addToTarolo(t, hova);
 	}
-
+	//összefûzés
 	cv::Mat pozitivak(2 * this->getTarolo(hova)[0].getKep().rows, 4 * this->getTarolo(hova)[0].getKep().cols, CV_8U);
 	for (int i = 0; i < 2; i++)
 		for (int j = 0; j < 4; j++) {
@@ -103,7 +140,7 @@ void TreningElemTarolo::beolvas(std::string utvonal, std::string kiterjesztes, T
 					this->getTarolo(hova)[i * 4 + j].getKep().rows)));
 		}
 
-	cv::imshow("MOBIL Pozitiv mintak beolvasva", pozitivak);
+	cv::imshow(ablaknev + pozminstring, pozitivak);
 
 
 	//negatív minták beolvasása
@@ -112,14 +149,13 @@ void TreningElemTarolo::beolvas(std::string utvonal, std::string kiterjesztes, T
 		std::string fajlnev(nprefix);
 		std::ostringstream ss; ss << std::setfill('0') << std::setw(2) << i;
 		fajlnev += ss.str();
-		fajlnev += ".png";
+		fajlnev += ".jpg";
 		cv::Mat beolvasottkep = Muveletek::kepBeolvas(fajlnev, GRAYSCALE);
 		TreningElem t{ beolvasottkep, fajlnev, false };
 		this->addToTarolo(t, hova);
 	}
 	int pozdb = this->getPozDB(this->getTarolo(hova)); //pozitív minták számának lekérése
 	std::cout << pozdb << " darab pozitiv minta volt!" << std::endl;
-	
 	//negativ minták
 	cv::Mat negativak(2 * this->getTarolo(hova)[7].getKep().rows, 4 * this->getTarolo(hova)[7].getKep().cols, CV_8U);
 	for (int i = 0; i < 2; i++)
@@ -130,16 +166,16 @@ void TreningElemTarolo::beolvas(std::string utvonal, std::string kiterjesztes, T
 				this->getTarolo(hova)[i * 4 + j + pozdb].getKep().rows)));
 		}
 	//this->listazas(this->getTarolo(hova));
-	cv::imshow("MOBIL Negativ mintak beolvasva", negativak);
+	cv::imshow(ablaknev + negmintstring, negativak);
 }
 
-enum Tipus TreningElemTarolo::svmTrening(enum Tipus t, std::string fajlnev) {
+Kategoria TreningElemTarolo::svmTrening(Kategoria t, std::string fajlnev) {
 	//hogdescriptor konstuktor: képméret, blokkméret, lépésköz, cellaméret, bindb
 	cv::HOGDescriptor HOGLeiro(this->getTarolo(t)[0].getKep().size(),
-		cv::Size(8, 8),
+		cv::Size(8, 8), 
 		cv::Size(4, 4),
-		cv::Size(4, 4),
-		9);
+		cv::Size(4, 4),  
+		9);               
 
 	//az elsõ (pozitiv) leiro számítása
 	std::vector<float> leirotarolo;
@@ -156,13 +192,13 @@ enum Tipus TreningElemTarolo::svmTrening(enum Tipus t, std::string fajlnev) {
 	//mintadb(sorok) x jellegzetessegdb(oszlopok) méretû mátrix létrehozása cv::Mat tip.változóba
 	cv::Mat mintak_matrix(mintadb, jelldb, CV_32F); //CV_32F: float értékeket képes fogadni
 
-													//az elsõ sor feltöltése a mátrixban
+	//az elsõ sor feltöltése a mátrixban
 	for (int i = 0; i < jelldb; i++)
 		mintak_matrix.ptr<float>(0)[i] = leirotarolo[i];
-
+	
 	int pozdb = this->getPozDB(this->getTarolo(t)); //pozitív minták számának lekérése
-
-													//poz. minták használata, i=1-tõl mert a 0. elem már megvolt
+													
+	//poz. minták használata, i=1-tõl mert a 0. elem már megvolt
 	for (int i = 1; i < pozdb; i++) {
 		HOGLeiro.compute(this->getTarolo(t)[i].getKep(), leirotarolo);
 		//sorok feltöltése
@@ -219,3 +255,4 @@ enum Tipus TreningElemTarolo::svmTrening(enum Tipus t, std::string fajlnev) {
 	}
 	return kimenet;
 }
+
