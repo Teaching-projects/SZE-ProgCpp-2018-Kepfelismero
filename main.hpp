@@ -9,9 +9,15 @@
 #include <opencv2\objdetect.hpp>
 #include <opencv2\ml.hpp>
 #include <string>
+#include <fstream>
+#include <map>
+#include <io.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #define TIPUSDB 3
 #define KEPDB 8 //beolvasott képek darabszáma típusonként
+#define TESZTKEPDB 5
 #define GRAYSCALE cv::ImreadModes::IMREAD_GRAYSCALE
 #define PI 3.1415927
 
@@ -42,9 +48,9 @@ private:
 	std::vector<TreningElem> burger;
 	std::vector<TreningElem> stop;
 	int getPozDB(std::vector<TreningElem> tarolo);
-	
+
 public:
-	void beolvas(std::string utvonal, std::string kiterjesztes, Tipus hova);
+	bool beolvas(std::string konfigfajl);
 	std::vector<TreningElem> getTarolo(Kategoria t);
 	static void listazas(std::vector<TreningElem> tarolo);
 	void addToTarolo(TreningElem t, Kategoria tt);
